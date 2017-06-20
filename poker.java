@@ -31,7 +31,7 @@ import java.util.Random;
 /**
  *
  * @author Sean Quinn
- * sean@dementia13.net
+ * squin037@fiu.edu
  * 
  * 
 |   Description: Simulates a deck of cards. Generates a 52-card deck 
