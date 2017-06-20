@@ -31,7 +31,7 @@ import java.util.Random;
 /**
  *
  * @author Sean Quinn
- * squin037@fiu.edu
+ * sean@dementia13.net
  * 
  * 
 |   Description: Simulates a deck of cards. Generates a 52-card deck 
@@ -553,8 +553,10 @@ static String getSuitName(int suit){
 
 	/* deal hands */	
         
+        System.out.println("Dealing hands: ");
 	allHands = dealHands(shuffledDeck, allHands); 
-
+        
+        System.out.println("Sorted hands: ");
 	textDisplayAllHands(allHands);
 	System.out.println("The winning hand is number " 
                 + getWinner(allHands));
