@@ -32,7 +32,7 @@ import static poker.poker.ZERO;
 /**
  *
  * @author Sean Quinn
- * sean@dementia13.net
+ * squin037@fiu.edu
  * 
  * This class contains the various functions used by Poker for scoring and 
  *  ranking the hands.
