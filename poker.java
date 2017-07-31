@@ -62,13 +62,43 @@ import java.util.Random;
 *               numerous language conveniences. Code has been updated to 
 *               conform to standard Java nomenclature.
 |
-|   *========================================================================
+|   *===========================================================================
  */
+
+/* -- FUNCTION LIST ------------------------------------------------------------
+
+    - constant declarations
+    - class definitions:
+        - Card()
+        - Deck()
+        - Hand()
+    - functions:
+        - assignCard
+        - createDeck
+        - dealHands
+        - getRank
+        - getRankName
+        - getSuit
+        - getSuitName
+        - getType
+        - getWinner
+        - setType
+        - shuffleDeck
+        - textDisplayAllHands
+        - textDisplayCard
+        - textDisplayDeck
+        - textDisplayHand
+        - textValidate
+        - main
+
+*/
+
 public class poker {
     
     // -- CONSTANTS ------------------------------------------------------------
     
     static public enum Suits {NULL, CLUBS, DIAMONDS, HEARTS, SPADES}
+
     static public enum Ranks {NULL, ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, 
         NINE, TEN, JACK, QUEEN, KING}
     Ranks RANK;
@@ -94,53 +124,145 @@ public class poker {
 /* The folowing constants give the base rank scores used in calculating
  * 	winners. Listed in ascending order of value: */
     static final int  PAIR_BASE = 430168;	
-    static final int  TWO_PAIR_BASE = 30743;				
-    static final int  THREE_KIND_BASE = 2545;	
-    static final int  STRAIGHT_BASE = 2545;		
+    static final int  TWO_PAIR_BASE = 33271;				
+    static final int  THREE_KIND_BASE = 4771;	
+    static final int  STRAIGHT_BASE = 2558;		
     static final int  FLUSH_BASE = 10;
     static final int  FULL_HOUSE_BASE = 430168;	
     static final int  FOUR_KIND_BASE = 183;
-    static final int  STRAIGHT_FLUSH_BASE = 183;
-
-    // -- CLASS DEFINITIONS ----------------------------------------------------
+    static final int  STRAIGHT_FLUSH_BASE = 6758;
     
+    static String handType = new String("unassigned");
+
+    // ----- CLASS DEFINITIONS -------------------------------------------------
+
+    /**                     Card
+     * Defines a Card object. The card is identified by an ID, an integer 1-52. 
+     * Each ID# specifies a rank (face value of card) and suit:
+     * <p>
+     * Suit:    ID:
+     * Clubs    1-13
+     * Diamonds 14-26
+     * Hearts   27-39
+     * Spades   40-52
+     * <p>
+     * Rank:    ID:
+     * Ace      1
+     * Two      2
+     * Three    3
+     * Four     4
+     * Five     5
+     * Six      6
+     * Seven    7   
+     * Eight    8
+     * Nine     9
+     * Ten      10
+     * Jack     11
+     * Queen    12
+     * King     13
+     * These are the values for the suit "clubs". Other suits are represented
+     * at the next group of 13. For instance, 14 is the Ace of Diamonds.
+     * <p>
+     * Each Card object includes String values for the card name and the suit
+     * name.
+     *
+     * @see Deck
+     * @see assignCard
+     * @see getRank
+     * @see getRankName
+     * @see getSuit
+     * @see getSuitName
+     */
     static public class Card{
 	int iDNum = 0;
 	int suit = 0;
 	int rank = 0;
 	String suitName = "";
 	String rankName = "";
+        
+        Card(){}
+        
+        Card(int cardID){
+            int idNum = cardID;
+            suit = 0;
+            rank = 0;
+            suitName = "Undefined";
+            rankName = "Undefined";
+        }
+        
+        @Override
+        public String toString(){
+            String cardString = "Card " + this.iDNum + "\n";
+            cardString += "\t" + this.rankName + " of " + this.suitName;
+            return cardString;
+        }
     }
     
+    /**                     Deck
+     * Standard deck is an array of 52 Card objects. It is instantiated as an
+     * array of Cards in sequential order. It is shuffled (randomized) before
+     * hands are dealt to individual players.
+     * 
+     * @see createDeck
+     * @see shuffleDeck
+     *
+     */
     static public class Deck{
         Card[] deck = new Card[DECK_SIZE];
     }
     
+    /**                     Hand
+     * A Hand is the set of Card objects dealt to each player. Each Hand is 
+     * represented by an integer from 1 to the number of players (default is 5).
+     * The "score" and "type" values are assigned separately.
+     * 
+     * @see dealHands
+     * @see Score.getScore
+     * @see getType
+     * @see setType
+     *
+     */
     static public class Hand{
         int handID = 0;
         long score = 0;
+        String type = "";
         Card[] hand = new Card[CPH + CARD_INIT];
         
         Hand(){}
         
-        Hand(int handID, long score, Card[] hand){}
+        Hand(int handID, long score, Card[] hand){
+            type = "";
+        }
+        
+    /**
+     *
+     */    
+        @Override
+    public String toString(){
+        String handString = "";
+        handString += "Hand " + this.handID + "\n";
+        handString += this.score + "\n";
+        for(int i = 1; i <= CPH; i++){
+            handString += this.hand[i].toString() + "\n";
+        }
+        handString += this.type;
+        return handString;    
+        }
     }
     
+    static boolean isTie = false;
 
     // -- 
-    
-    /*----------------- assignCard  ----------------------------------------------
- * function assignCard(int iD) 
- *
- * Purpose: Receives an int that represents a card in a deck, assigns the
- * 	rank and suit both as an integer and as a string value 
- *
- * @param - int iD - identifier, an int 1-52 that represents the card 
- *
- * @return Card - the complete structure representing a single card 
- *
------------------------------------------------------------------------------*/
-    Card assignCard(int iD){
+      
+    /**                     assignCard  
+     * Returns a Card object generated from an int that represents the Card's
+     * ID number parameter. Sets the values for a previously generated Card.
+     *
+     * @param   iD  the Card's ID field, from which rank & suit information is
+     * extracted
+     * @return      A fully implemented Card object
+     */
+    static Card assignCard(int iD){
 	Card newCard = new Card();
 	String suitName = "";
 	String rankName = "";
@@ -151,20 +273,31 @@ public class poker {
         newCard.rankName = getRankName(newCard.rank);	
 	return newCard;
     } 
+        
+    /**                     assignHand
+     *  Assigns a new Hand given an ID number and an array of Card objects
+     * 
+     * @param   iD      ID number of the Hand
+     * @param   theHand an array of Card objects 
+     * @return          a fully implemented Hand object
+     */
+    static Hand assignHand(int iD, Card[] theHand){
+        Hand newHand = new Hand();
+        newHand.handID = iD;
+        newHand.hand = theHand;
+        newHand.score = 0;
+        newHand.type = "unassigned";
+        return newHand;
+    }
     
-/*----------------- createDeck ----------------------------------------------
- * function createDeck(Deck newDeck)
- *
- * Purpose: Generates a deck of cards. This is nothing special- it's just
- * 	a counting loop. Rank and suit assigned by division in separate
- *      functions getRank and getSuit
- *
- * @param - Deck newDeck - array of type Card. Elements are populated by
- * 	iterating the array. 
- *
- * @return Deck- the generated Deck
- *
------------------------------------------------------------------------------*/
+    /**                     createDeck
+     * Generates a deck of cards. Each pass through the loop (52 iterations)
+     * produces a new Card ID# and calls functions to assign rank & suit.
+     * 
+     * @param   null
+     * @return  A new, standard deck of cards
+     *
+     */
     static Deck createDeck(){
         Deck newDeck = new Deck();
 
@@ -181,47 +314,44 @@ public class poker {
     }
     
     // -- FUNCTIONS FOR DEALING CARDS ------------------------------------------
-    
-/*----------------- dealHands --------------------------------------------------
- * function dealHands(int, Deck, Hand[]) 
- *
- * Purpose: Distributes cards from a generated deck to a user-specified
- *          number of players. Each Hand is dealt in a separate function
- *          and the array is assembled and returned here
- *      
- * Procedure: Iterates through array of hands. Each pass through loop 
- *          calls dealOneHand, which generates and returns the new Hand.
- *            
- *
- * @param - int NUM_HANDS - a user-specified number of players
- * 	   Deck sDeck - the (shuffled) deck to be dealt
- * 	   Hand aHands[] - array of all hands in the game 
- *
- * @return aHands[] - returns array of dealt Hands
- *
------------------------------------------------------------------------------*/
+       
+    /**                     dealHands
+     * Distributes cards from an already-generated deck to the individual players.
+     * Cards are not dealt in sequence but are instead dealt in round-robin fashion
+     * as would be done in a physical poker game.
+     * <p>
+     * Cards are selected from the deck and sorted in order of ascending value. 
+     * The resulting array is evaluated for a score value. The array of Card objects,
+     * the score and the type of hand are then assembled into a Hand object. An
+     * array of these Hand objects constitutes the game.
+     *
+     * @param   sDeck   a shuffled deck of cards
+     * @param   aHands  array of all Hand objects in the game
+     * @return          the array of all Hand objects
+     * @see     Score.sortHand
+     * @see     Score.getScore
+     * @see     getType
+     */
     static Hand[] dealHands(Deck sDeck, 
 		Hand[] aHands){
 	int handCount = CARD_INIT;
 	int deckCount = CARD_INIT;
-
-	/* These are to be passed to the function that deals the
- 		individual hands. */ 
         
         // loop that calls the dealing function
 	for (int gameCount = CARD_INIT; gameCount <= NUM_HANDS; gameCount++){
             int nextCard = gameCount;               // First card to be dealt 
             Hand newHand = new Hand();
-            newHand.handID = gameCount;	
+            Card[] newCard = new Card[CPH + 1];
             for(int cardCount = CARD_INIT; cardCount <= CPH; cardCount++){
-		newHand.hand[cardCount] = sDeck.deck[nextCard];
+		newCard[cardCount] = sDeck.deck[nextCard];
 		nextCard += NUM_HANDS;
             }
-            textDisplayHand(newHand);
+            newHand = assignHand(gameCount, newCard);
             newHand = Score.sortHand(newHand);
             newHand.score = Score.getScore(newHand);
+            newHand.type = getType();
             aHands[gameCount] = newHand;
-
+            System.out.println(newHand.toString());
             /* reset deal counters */
             //nextCard++;              
             deckCount += CPH;	/* Tracks how many cards
@@ -237,6 +367,7 @@ public class poker {
 	return aHands;
     }
 
+
 /*----------------- getRank -------------------------------------------------
  * function getRank(int iD)
  *
@@ -251,7 +382,10 @@ public class poker {
  * @return int- 1-10 represent the numbered ranks, 11 is "jack",
  * 	12 is "queen" and 13 is "king".
  *
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+/**
+ *
+ */
     static int getRank(int iD){
 	int rank;
 	rank = (iD % NUM_RANKS);
@@ -271,7 +405,10 @@ public class poker {
  * @param int rankID - The integer value of the card's rank. 
  *
  * @return String rankName - The string name of the card's rank. 
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static String getRankName(int rankID){
         String rankName = "";
         switch(rankID){
@@ -332,7 +469,10 @@ public class poker {
  * @return int- 1 = "clubs", 2 = "diamonds", 3 = "hearts", 4 = "clovers".
  * 	No, wait, 4 = "spades" 
  *
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static int getSuit(int iD){
 	int suit;
 	suit = iD / NUM_RANKS;
@@ -352,7 +492,10 @@ public class poker {
  *
  * @return - none. Value is returned by pointer manipulation. 
  *
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
 static String getSuitName(int suit){
     String suitName = "";
     switch (suit){
@@ -373,46 +516,66 @@ static String getSuitName(int suit){
     }
     return suitName;
 }
-/*----------------- getWinner ------------------------------------------------
- * function getWinner 
- *
- * Purpose: Finds the highest score of the hands 
- *
- * @param - Hand[] - all Hands
- * 	int num_hands - number of players
- *
- * @return - int - ID# of the winning hand 
- *
------------------------------------------------------------------------------*/
 
+/**                     getType
+ * Retrieves value of the variable handType, to be assigned to the "type" 
+ * field of a Hand object
+ * 
+ * @return a String value representing the Hand ranking
+ *
+ */
+    static String getType(){
+        return handType;
+    }
+    
+/**                     getWinner
+ * Finds the highest score of the hands.
+ * 
+ * @param allHands  Array of all hands in the game
+ * @return          ID# of the winning hand
+ *
+ */
     static int getWinner(Hand allHands[]){
 	long highScore = 0;
 	int winner = 0;
 	for (int handex = CARD_INIT; handex <= NUM_HANDS; handex++){
-		if (allHands[handex].score > highScore){
-			highScore = allHands[handex].score;
-			winner = allHands[handex].handID;
-		}	
+            if (allHands[handex].score > highScore){
+                    highScore = allHands[handex].score;
+                    isTie = false;
+                    winner = allHands[handex].handID;
+            }
+            else
+            if (allHands[handex].score == highScore){
+                isTie = true;
+            }
+            System.out.println(allHands[handex].score);
 	}
 	return winner;
     }
-
-/*----------------- shuffleDeck ---------------------------------------------
- * function shuffleDeck(Deck origDeck)
- *
- * Purpose: Is passed a previously generated deck of cards, shuffles it,
- *      and returns it
- * 	Implements the Fisher-Yates shuffle as referenced at webpage
- * 	https://en.wikipedia.org/wiki/
- *		Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
- *      Counts down from the highest-value card in the deck, and swaps that 
- *      with a card from a random position
- *
- * @param Deck(origDeck) - previously generated deck
- *
- * @return Card* - pointer to the first array element of shuffled deck 
- *
------------------------------------------------------------------------------*/
+    
+    /**                     setType
+     * Assigns a value to the handType variable, used to assign type to a Hand 
+     * object
+     *
+     * @param type  the ranking of the Hand (full house, etc.)
+     * @return      null
+     * @see         getType
+     * 
+     */
+    static void setType(String type){
+        handType = type;
+    }
+    
+    /**                     shuffleDeck
+     * Randomizes a deck of cards according to the Fisher-Yates algorithm. See
+     * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+     * for more details. Starting with card ID# 52, it swaps places with a 
+     * random card from the deck, and repeats while counting downward.
+     * 
+     * @param origDeck  Standard (unshuffled) deck
+     * @return          Shuffled deck
+     *
+     */
     static Deck shuffleDeck(Deck origDeck){
         Deck sDeck = origDeck;
         Random randm = new Random(System.nanoTime());
@@ -443,7 +606,10 @@ static String getSuitName(int suit){
  * 	   Hand allHands[] - array of all Hands in play 
  *
  * @return none. Is a print function.
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static void textDisplayAllHands(Hand[] allHands){
 	for (int handCount = CARD_INIT; handCount <= NUM_HANDS; handCount++){
             // System.out.println("Displaying hand #" + handCount + ":");
@@ -460,7 +626,10 @@ static String getSuitName(int suit){
  * @param struct card dispCard - a card, that's all
  *
  * @return none. Is a print function.
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static void textDisplayCard(Card dispCard){
 	System.out.println(dispCard.rankName + " of " + dispCard.suitName);
     }
@@ -475,11 +644,14 @@ static String getSuitName(int suit){
  * @param Deck showDeck - Deck to be displayed
  *
  * @return none. Is a print function.
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static void textDisplayDeck(Deck showDeck){
         System.out.println("Displaying deck: ");
 	for (int deckIndex = CARD_INIT; deckIndex < DECK_SIZE; deckIndex++){
-		textDisplayCard(showDeck.deck[deckIndex]);
+            textDisplayCard(showDeck.deck[deckIndex]);
 	}
     }
 
@@ -491,21 +663,22 @@ static String getSuitName(int suit){
  * @param Hand showHand - Hand to be displayed 
  *
  * @return none. Is a print function.
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     static void textDisplayHand(Hand showHand){
 	System.out.println("Hand #" + showHand.handID + ":");
 	for(int index = CARD_INIT; index <= CPH; index++){
-		textDisplayCard(showHand.hand[index]);
+            //System.out.println(showHand.toString());
+            System.out.print(index + " ");
+            System.out.print(showHand.hand[index].rankName + " of " );
+            System.out.println(showHand.hand[index].suitName);
+            textDisplayCard(showHand.hand[index]);
 	}
+        System.out.println(showHand.type);
         System.out.println();
     }
-    
-    // -- GUI -----------------------------------------------------------------
-    
-    static void createAndShowGUI(){
-    
-    }
-    
     
 /*----------------- textValidate -------------------------------------------------
  * function textValidate() 
@@ -518,7 +691,10 @@ static String getSuitName(int suit){
  *
  * @return - boolean, true if NUM_HANDS is within the proper range
  *
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------*/    
+    /**
+     *
+     */
     boolean textValidate(){
 	if ((NUM_HANDS < MIN_PLYRS) || (NUM_HANDS > MAX_PLYRS)){
             System.out.print("Improper input. Enter a number of players ");
@@ -535,31 +711,36 @@ static String getSuitName(int suit){
      */
     public static void main(String[] args) {
 
-        poker.createAndShowGUI();
+        //poker.createAndShowGUI();
+        Window.main(args);
 
 	Hand allCards = new Hand();
 	Hand[] allHands = new Hand[NUM_HANDS + CARD_INIT];
         
 	/* create deck */
         //System.out.println("Creating deck.");
-	Deck originalDeck = createDeck();
+	//Deck originalDeck = createDeck();
         //System.out.println("Displaying original deck.");
 	//textDisplayDeck(originalDeck);
 
 	/* shuffle deck */
         //System.out.println("Shuffling deck: ");
-	Deck shuffledDeck = shuffleDeck(originalDeck);
-	//textDisplayDeck(shuffledDeck);	
+	//Deck shuffledDeck = shuffleDeck(createDeck());
+	//textDisplayDeck(Window.shuffledDeck);	
 
 	/* deal hands */	
         
         System.out.println("Dealing hands: ");
-	allHands = dealHands(shuffledDeck, allHands); 
+	//allHands = dealHands(shuffledDeck, allHands); 
         
         System.out.println("Sorted hands: ");
-	textDisplayAllHands(allHands);
-	System.out.println("The winning hand is number " 
-                + getWinner(allHands));
+	//textDisplayAllHands(allHands);
+        if(!isTie){
+           // System.out.println("The winning hand is number " 
+            //        + getWinner(allHands));
+        }
+        else
+            System.out.println("No winner: tie");
 
 
     }

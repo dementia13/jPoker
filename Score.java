@@ -27,17 +27,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package poker;
 
 import java.util.ArrayList;
+import static poker.poker.CARD_INIT;
+import static poker.poker.CPH;
+import static poker.poker.DECK_SIZE;
+import poker.poker.Hand;
+import static poker.poker.NUM_HANDS;
+import static poker.poker.NUM_RANKS;
 import static poker.poker.ZERO;
 
 /**
  *
  * @author Sean Quinn
- * squin037@fiu.edu
+ * sean@dementia13.net
  * 
  * This class contains the various functions used by Poker for scoring and 
  *  ranking the hands.
  */
 public class Score {
+    
+    static final int HIGH_ACE = 14; // value of high ace in a straight
+    
     static int[] mCount = {ZERO, ZERO};
 
     /*
@@ -75,30 +84,34 @@ public class Score {
 	return r_count;
     }
     */
-                        
-/*----------------- getMost ----------------------------------------------------
- * function getMost(int, int, int)
- *
- * Purpose: Tracks when highest or second-highest card count changes 
- *
- * @param int(changed) - the new card
- * 	  int *most - the high count
- * 	  int *n_most - the second high count
- *
- * @return int[] - the three most common ranks in descending order. Given 5
- *      cards, there can be at most two ranks that appear in multiple, along 
- *      with a possible third single card
- *
-------------------------------------------------------------------------------*/
-    static int[] getMost(int changed, int most, int nextMost){
-        if (changed > most){
-            nextMost = most;
-            most = changed;
+    
+/**                        getMost
+* Track cards that appear in a Hand multiple times. A 5-card hand can have at
+* most 2 cards that appear multiple times, so this is a 2-int array that
+* contains the most- and second-most-frequently occurring Cards.
+* This is used for sorting and scoring the Hands.
+* 
+* @param counts     the value that changed
+* @return           int array with the number of times the most-frequently
+*                   occurring cards appear. The actual card values are not 
+*                   specified.
+*
+*/
+    static int[] getMost(int[] counts){
+        int removed = 0;
+        int most = 0, nextMost = 0;
+        for(int index = 0; index < CPH; index++ ){
+            if(counts[index] > most){
+                most = counts[index];
+                removed = index;
+            }
         }
-        else
-        if (changed > nextMost){
-            nextMost = changed;
-        } 
+        for(int nindex = 0; nindex < CPH;
+                nindex++){
+            if((counts[nindex] > nextMost) && (nindex != removed)){
+                nextMost = counts[nindex];
+            }
+        }
         return new int[]{most, nextMost};
     }
 
@@ -112,147 +125,140 @@ public class Score {
  *      cards, there can be at most two ranks that appear in multiple
  *
 ------------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static int[]getMostCount(){
         return mCount;
     }
+    
+/**                     getScore
+ * Assigns a score to each hand. Scoring is based on five-card draw rules as
+ * referenced from website https://www.pokerstars.com/poker/games/rules/hand-rankings/ 
+ * <p>
+ * Order of rankings:
+ * <li>Straight flush</li>
+ * <li>Four of a kind</li>
+ * <li>Full house</li>
+ * <li>Flush</li>
+ * <li>Straight</li>
+ * <li>Three of a kind</li>
+ * <li>Two pair</li>
+ * <li>One pair</li>
+ * <li>High card</li>
+ * <p>
+ * The low cards, which are not part of a ranking or are not the high card in a 
+ * hand with no groupings, are used as tiebreakers. Hands are sorted in order, and
+ * a tie at one position will result in the next lower card being used as a tiebreaker.
+ * Each position is weighted so that the higher card has more influence on the 
+ * hand score. For example, a 4 and a 3 cannot outrank a 5 and an ace. Each position
+ * in the hand carries a base score that is higher than what the next lower position
+ * can achieve, and each ranking carries a base score that is higher than the 
+ * highest possible score of the next lower ranking.
+ * <p>
+ * This function analyzes each hand for its type and depends on helper functions
+ * to calculate the score.
+ * 
+ * @param   aHand   Each hand is passed to this function at its creation
+ * @return          a long integer score value
+ */
+    static long getScore(Hand aHand){
+        long score = ZERO;
+        int straight = ZERO;
+        int flush = ZERO;
+        int hIndex = ZERO;
+        int rankCount = ZERO;
 
-/*----------------- getScore ---------------------------------------------------
- * function getScore(Hand)
- *
- * Purpose: Assigns a score to each hand. Score is assigned based on 
- * 	information at website
- * 	https://www.pokerstars.com/poker/games/rules/hand-rankings/ 
- *
- *	Rankings in this order;
- *	Straight flush
- *	Four of a kind
- *	Full house
- *	Flush
- *	Straight
- *	Three of a kind
- *	Two pair
- *	One pair
- *	High card
- *
- *	Each type of hand starts with a base score. This base score is higher 
- *      than the highest possible score of the next lower rank. The face
- *	value of the hand is added to this base, and the total is returned.
- *
- *	Cards that aren't part of a winning grouping (for example, the other 
- *      two cards in a three-of-a-kind) are factored in as tiebreakers. 
- *      This is done in such a way that values can't overlap. For example, 
- *      two eights, two twos and a King cannot outweigh two eights, two
- *      threes and a two. Each card or grouping has its own base score that is 
- *      guaranteed to outrank any combination of lower-valued cards.
- *	This causes surprisingly high score values, especially in the
- *	lower-value hands, but it ranks hands accurately.
- *
- *      This function is unavoidably long because it has to sort through the
- *      nine possible ranks and the number of combinations possible within
- *      each. Separate functions analyze the hand to determine what kind it
- *      is, and the result is sent to the appropriate function to calculate the
- *      score.
- *
- *      Each hand is passed through this function in turn. A set of integers
- *      track the highest through lowest face values present, as well as 
- *      whether all the cards are of the same suit.
- *
- * @param - Hand - the Hand being scored 
- *
- * @return long score - the score value of the hand 
- *
------------------------------------------------------------------------------*/
-static long getScore(poker.Hand aHand){
-	long score = ZERO;
-	int straight = ZERO;
-	int flush = ZERO;
-	int hIndex = ZERO;
-	int rankCount = ZERO;
-        
         // -- Values used in calculating scores --------------------------------
 
-	int highCard = aHand.hand[5].rank;
-	int lowCard = aHand.hand[1].rank;
-	int nextCard = aHand.hand[4].rank;
-	int thirdCard = aHand.hand[3].rank;
-	int fourthCard = aHand.hand[2].rank;
-	int highCount = ZERO;
-	int nextCount = ZERO;
-	int thirdCount = ZERO;
-	int fourthCount = ZERO;
-	int lowCount = ZERO;
-	int suitCount = poker.CARD_INIT;
+        int highCard = aHand.hand[5].rank;
+        int lowCard = aHand.hand[1].rank;
+        int nextCard = aHand.hand[4].rank;
+        int thirdCard = aHand.hand[3].rank;
+        int fourthCard = aHand.hand[2].rank;
+        int highCount = ZERO;
+        int nextCount = ZERO;
+        int thirdCount = ZERO;
+        int fourthCount = ZERO;
+        int lowCount = ZERO;
+        int suitCount = poker.CARD_INIT;
 
-	for(int i = poker.CARD_INIT; i < poker.CPH; i++){
+        for(int i = poker.CARD_INIT; i < poker.CPH; i++){
             if(aHand.hand[i].suit == aHand.hand[i + poker.CARD_INIT].suit){
                 suitCount++;
             }
         }
 
-	/* Iterate through hand
-  		Break down hand for:
-  		- what is the high card in the hand
-  		- how many times does each rank appear */
+        /* Iterate through hand
+                Break down hand for:
+                - what is the high card in the hand
+                - how many times does each rank appear */
 
-        
+
         // make an array of the five face values in ascending order
-	int sorted[] = {ZERO, lowCard, fourthCard, thirdCard, 
+        int sorted[] = {ZERO, lowCard, fourthCard, thirdCard, 
                 nextCard, highCard}; 
         int[] mostCount = getMostCount();
         highCount = mostCount[ZERO];
         nextCount = mostCount[1];
 
-	switch (highCount){
-		case 4: 
-			return isFourKind(highCard, lowCard);
-		case 3:
-			if(lowCount == 2){
-				return isFullHouse(highCard, lowCard);
-			}
-			else
-			return isThreeKind(highCard, nextCard, lowCard);
-		case 2:
-			if(nextCount == 2){
-				return isTwoPair(highCard, 
-					highCard, lowCard);
-			}
-			else
-			return isPair(highCard, nextCard, thirdCard,
-					lowCard);	
-		case 1:
-			if (hasStraight(sorted) == true){
+        switch (highCount){
+                case 4: 
+                        poker.setType("Four of a kind");
+                        return isFourKind(highCard, lowCard);
+                case 3:
+                        if(nextCount == 2){
+                            poker.setType("Full house");
+                            return isFullHouse(highCard, lowCard);
+                        }
+                        else  
+                            poker.setType("Three of a kind");
+                            return isThreeKind(highCard, nextCard, lowCard);
+                case 2:
+                        if(nextCount == 2){
+                            poker.setType("Two pairs");
+                            return isTwoPair(highCard, highCard, lowCard);
+                        }
+                        else
+                            poker.setType("One pair");
+                            return isPair(highCard, nextCard, thirdCard,
+                                        lowCard);	
+                case 1:
+                        if (hasStraight(sorted) == true){
                             if (suitCount == poker.CPH){
+                                poker.setType("Straight flush");  
                                 return isStraightFlush(lowCard);
                             }
+                                poker.setType("Straight");
                                 return isStraight(lowCard);
                         }
-			else
-			if (suitCount == poker.CPH){
+                        else
+                        if (suitCount == poker.CPH){
+                            poker.setType("Flush");
                             aHand = isFlush(aHand);
                             return aHand.score;
-			}
-			else
-			return isHighCard(sorted);
-		default:
-			System.out.println("logic error in getScore function");
-	}
-	return score;
+                        }
+                        else
+                            poker.setType("High card");
+                            return isHighCard(sorted);
+                default:
+                        System.out.println("logic error in getScore function");
+        }
+        return score;
     }       
-
     
-/*----------------- getSortedHand ----------------------------------------------
- * function getSort(int[], Hand) 
- *
- * Purpose: Sorts the cards in ascending order. 
- *
- * @param - Hand uHand - the unordered hand 
- * @param - int[] sorted - the card values, high to low
- *
- * @return - Hand sHand - the sorted hand of cards 
- *
------------------------------------------------------------------------------*/
-    static poker.Hand getSortedHand(int[] sorted, poker.Hand uHand){
-        poker.Hand sHand = new poker.Hand();
+/**                        getSortedHand
+ * Matches information from the Hand object back to the int array of sorted
+ * Card ID#s, resulting in a Hand sorted by ascending Card value.
+ * <p>Maybe there's an easier way to do this.
+ * 
+ * @param   sorted  array of Card ID#s sorted by ascending value
+ * @param   uHand   Hand object to be sorted
+ * @return          Hand object with Cards sorted by ascending value
+*
+*/
+    static Hand getSortedHand(int[] sorted, Hand uHand){
+        Hand sHand = new Hand();
             boolean removed[] = new boolean[poker.CPH + poker.CARD_INIT];
         for(int cSortIndex = poker.CARD_INIT; cSortIndex <= poker.CPH; 
                     cSortIndex++){
@@ -278,33 +284,34 @@ static long getScore(poker.Hand aHand){
             }
         }
         sHand.handID = uHand.handID;
+        sHand.type = uHand.type;
         return sHand;
+    }
+    
+/**                     getTie
+ * Detects whether a game has two hands with the same winning score. Doesn't
+ * care if there is a tie for a lower place.
+ * 
+ * @param   allHands    array of all Hand objects
+ * @param   winner      ID# of hand with high score
+ * 
+ * return               true if tied, false otherwise
+ *
+ */
+    static boolean getTie(Hand[] allHands, int winner){
+        //boolean tie = false;
+        long target = allHands[winner].score;
+        for(int handex = 1; handex <= NUM_HANDS; handex++){
+            if((handex != winner) && (allHands[handex].score == target)){
+                poker.isTie = true;
+                return true;
+            }
+        }
+        return false;
     }
 
     
-    // -- "HAS" FUNCTIONS - DETECT PRESENCE OF STRAIGHT OR FLUSH
-    
-/*----------------- hasFlush -------------------------------------------------
- * function hasFlush(int)  
- *
- * Purpose: Marks when flush is detected. Does little: the int suitCount in
- *  the calling function, getScore, is passed in. If suitCount is the same as
- *  the number of cards in a hand, then they are all the same suit & is a flush
- *
- * @param - int suitCount
- *
- * @return - true or false
- *
------------------------------------------------------------------------------*/
-    /*
-    static boolean hasFlush(int suitCount){
-	if (suitCount == poker.CPH){
-		return true;
-	}
-	else
-            return false;
-    }
-    */
+    // DETECT PRESENCE OF STRAIGHT
     
 /*----------------- hasStraight ------------------------------------------------
  * function hasStraight(int[])  
@@ -320,22 +327,24 @@ static long getScore(poker.Hand aHand){
  * @return - true or false 
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static boolean hasStraight(int sorted[]){
-	int count;
-	int temp;
+        // if 2 low cards are 1 & 10, it is a royal straight, set ace high
 	if ((sorted[1] == 1) && (sorted[2] == 10)){
-		temp = poker.NUM_RANKS + poker.CARD_INIT;  
-		sorted[1] = sorted[2];
-		sorted[2] = sorted[3];
-		sorted[3] = sorted[4];
-		sorted[4] = sorted[5];
-		sorted[5] = temp;
+            sorted[1] = sorted[2];
+            sorted[2] = sorted[3];
+            sorted[3] = sorted[4];
+            sorted[4] = sorted[5];
+            sorted[5] = HIGH_ACE;
 	}
         // returns false if any card is not one more than the previous
-	for (count = poker.CARD_INIT; count < sorted[poker.CPH]; count++){
-		if ((sorted[count + poker.CARD_INIT] - sorted[count]) != 1){
-			return false;
-		} 
+	for(int count = CARD_INIT + 1; count <= CPH; count++){
+            int strtCount = (sorted[count] - sorted[count - 1]);
+            if (strtCount != 1){
+                    return false;
+            } 
 	}
 	return true;
     }
@@ -352,6 +361,9 @@ static long getScore(poker.Hand aHand){
  * @return - int - flush base value + weighted face card value 
  *
 ------------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static poker.Hand isFlush(poker.Hand sHand){
 	long score = 0;
 	/* Numbers are as calculated for isHighCard */
@@ -384,6 +396,9 @@ static long getScore(poker.Hand aHand){
  * @return - long - score + scores of all lower-ranked combinations
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isFourKind(int high, int low){
 	long score = 0;
 	score = (13 * high + 14) + low;
@@ -411,6 +426,9 @@ static long getScore(poker.Hand aHand){
  * @return - long score - base score for a full house + the suit value
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isFullHouse(int highCard, int lowCard){
 	int score;
 	/* numbers derived in function description */
@@ -447,6 +465,9 @@ static long getScore(poker.Hand aHand){
  * @return - long score - weighted value of all cards in hand
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isHighCard(int[] sorted){
 	long score = 0;
 	/* numbers are as calculated in function documentation */
@@ -462,12 +483,12 @@ static long getScore(poker.Hand aHand){
  * Purpose: Calculates the score of a hand identified to contain one pair.
  * 	Lowest possible score is higher than highest possible score of a 
  * 	High Card hand - ensured by adding hand score on top of High Card
- * 	high score of 200,616.
+ * 	high score of 430,168.
  * 	Highest possible 1-pair hand: 2K - Q - J - 10
  * 	low card: 1-10
  * 	third card: 11 cards: 11 + (11 * 13) = 154 
- * 	next card: 12 cards: 154 + (12 * 169) = 2182
- * 	high card: 13 cards: 2182 + (13 * 13 * 13 * 13) = 30743
+ * 	next card: 12 cards: 155 + (12 * 169) = 2183
+ * 	high card: 13 cards: 2183 + 2(13 * 13 * 13 * 13) = 59305
  * 	Adding all gives two pair base: 33089
  *
  * @param - Hand - the Hand to be tested 
@@ -477,6 +498,9 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
  *      weighted value of single cards in hand
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isPair(int highCard, int nextCard, int thirdCard,
 					int lowCard){
 	long score = 0;
@@ -503,6 +527,9 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
  * @return - long - low card + base score 
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isStraight(int lowCard){
 	long score = 0;
 	score = (lowCard + poker.PAIR_BASE + poker.TWO_PAIR_BASE + 
@@ -524,6 +551,9 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
  * 			plus the low suit of the hand 
  *
 -----------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static long isStraightFlush(int lowCard){
 	long score = 0;
 	score = (lowCard + poker.FOUR_KIND_BASE + poker.FULL_HOUSE_BASE + 
@@ -533,25 +563,18 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
 	return score; 
     }
     
-/*----------------- isThreeKind ----------------------------------------------
- * function isThreeKind(int hCard, int nCard, int lCard)  
- *
- * Purpose: returns the score of a hand containing a three-of-a-kind 
- *
- * @param - int - the rank value of the three-of-a-kind
- * 	and two tiebreaker cards 
- * 	See isHighCard for further details
- * 	Highest possible hand: 3K + Q + J
- * 	low card: 1-11
- * 	next card: 12 faces: 12 + 12 * 13 = 168
- *	high card: 13 faces: 169 + 13 * 13 * 13 = 2366 
- *	Adding all gives straight base: 2545
- *
- * @return - long - the score of the hand above the highest possible scores
- * 	of all lower hands 
- * 	200,636 + 22,330 + 1885 = 224851
- *
------------------------------------------------------------------------------*/
+/**                     isThreeKind
+ * Calculates the score of a three-of-a-kind hand. Starts with the highest
+ * possible score of a 2-pair hand.
+ * Highest hand: 3K + Q + J
+ * 
+ * @param   hCard   Three of a kind card value
+ * @param   nCard   high single card
+ * @param   lCard   low single card
+ * @return 
+ * @see     isHighCard
+*
+*/
     static long isThreeKind(int hCard, int nCard, int lCard){
 	long score = 0;
 	/* See function description for derivation of these numbers */
@@ -561,26 +584,21 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
 	return score; 
     }
     
-/*----------------- isTwoPair ----------------------------------------------
- * function isTwoPair(Hand)  
- *
- * Purpose: calculates the score of a hand with two pairs.
- * 	    See isHighCard and isPair for details on the scoring.	 
- * 	    Highest possible hand: 2K + 2Q + J
- * 	    low card: 1-11
- * 	    next card: 12 cards: 12 + 12 * 13 = 168
- * 	    high card: 13 cards: 169 + 13 * 13 * 13 = 2366
- * 	    Adding all gives Three of a kind base: 2545
- *
- * @param - int highCard - higher of the two pairs
- * 	    int nextCard - lower of the two pairs
- * 	    int lowCard - tiebreaker card 
- *
- * @return - long - score for the hand + highest possible score for
- *	    a single-pair hand + highest score for a high-card hand,
- *	    200,636 + 22,330 = 222,966 
- *
------------------------------------------------------------------------------*/
+/**                        isTwoPair
+ * Calculates the score of a hand with two pairs.
+ * High hand: 2K + 2Q + J
+ * low card: 1-11
+ * next card: 12 cards: 11 + 2(12 * 13) = 323
+ * high card: 12 cards: 323 + 2(13 * 13 * 13) = 4406
+ * base: 463,439
+ * 
+ * @param highCard  the high pair
+ * @param nextCard  the low pair
+ * @param lowCard   the single card
+*
+* @see  isHighCard
+* @see  isPair
+*/
     static long isTwoPair(int highCard, int nextCard, int lowCard){
 	long score = 0;
 	/* numbers as derived in function description */
@@ -603,49 +621,48 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
  *      from getScore
  *
 ------------------------------------------------------------------------------*/
+ /**
+ *
+ */
     static void setMostCount(int[] mostCount){
         mCount = mostCount;
     }
     
-/*----------------- sortHand ---------------------------------------------------
- * function sortHand(Card[]) 
+/**                        sortHand
+ * Arranges a Hand of Card objects in order from lowest to highest value. 
+ * Groupings, such as pairs, are set at the high position, even if their face
+ * value is lower than those of any of the other cards. Multiple instances of
+ * groupings, as in two pairs or a full house, are themselves arranged in
+ * ascending order. 
+ * <p>
+ * The function iterates through the hand to determine the order of values and
+ * whether any cards appear multiple times. The array mostCount tracks 
+ * multiple appearances of up to 2 cards (more than 2 is impossible in a 5-card
+ * hand). 
+ * 
+ * @param uHand    the Hand object to be processed
+ * @return         the Hand in sorted order
  *
- * Purpose: Sorts the cards in order. 
-    - Iterates the hand to see which has the highest value
-    - Keeps a running total of any ranks that appear multiple times
-    - Cards are sorted into order of multiple ranks first, and then by 
-    -   descending rank value
-    - function getMost tracks multiple appearances and stores them in
-    -   int array mostCount
- *
- * @param - Hand uHand - the unordered hand 
- *
- * @return - Hand - returns the hand sorted in ascending order
- *
------------------------------------------------------------------------------*/
+ */
     static poker.Hand sortHand(poker.Hand uHand){
-	//int rank_count = poker.ZERO;
-	int most = poker.ZERO;
-	int nextMost = poker.ZERO;
-	int temp = poker.ZERO;
+	int most = ZERO;
+	int nextMost = ZERO;
+	int temp = ZERO;
         int temp2 = ZERO;
         int tempCount = ZERO;
 
-	int highCard = poker.ZERO;
-	int nextCard = poker.ZERO;
-	int thirdCard = poker.ZERO;
-	int fourthCard = poker.ZERO;
-	int lowCard = poker.DECK_SIZE;
+	int highCard = ZERO;
+	int nextCard = ZERO;
+	int thirdCard = ZERO;
+	int fourthCard = ZERO;
+	int lowCard = DECK_SIZE;
         
-        int highCount = poker.ZERO; 
-        int nextCount = poker.ZERO;
-        int thirdCount = poker.ZERO;
-        int fourthCount = poker.ZERO; 
-        int lowCount = poker.ZERO;
-        int suitCount = poker.ZERO;
-        
-        //System.out.println("sortHand: before");
-        //poker.textDisplayHand(uHand);
+        int highCount = ZERO; 
+        int nextCount = ZERO;
+        int thirdCount = ZERO;
+        int fourthCount = ZERO; 
+        int lowCount = ZERO;
+        int suitCount = ZERO;
         
         int[] mostCount = new int[]{most, nextMost};
     // Case: new card is same rank as existing high card
@@ -661,7 +678,7 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                     thirdCount = nextCount;
                 }
                 nextCard = uHand.hand[index].rank;
-                mostCount = getMost(highCount, most, nextMost); 
+                nextCount = 0;
             }  
             else{
                 if (uHand.hand[index].rank > highCard){
@@ -669,20 +686,25 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                     if(index == 1){
                         highCard = uHand.hand[index].rank;
                         highCount++;
-                        mostCount = getMost(highCount, most, nextMost);
                     }
                     else{
-    // Case: new card is higher than existing high card 
+        // Case: new card is higher than existing high card 
+                       // if(highCard == lowCard){
+            //Case: Two or more very low cards have been read in
+                            
+                            
+                        //}
                         if(lowCard == poker.DECK_SIZE){
                             /* if there's a high card
         * 					but not a low card */ 
                             lowCard = highCard;
                             lowCount = highCount;
-                            mostCount = getMost(lowCount, most, nextMost);
                         }
                         else{
                             /* add the new high card and push any
         * 					existing cards down the ranks */
+                            // Safe: If there were already a fourth card, we
+                            // wouldn't still be reading in new cards
                             if(thirdCard > ZERO){
                                 fourthCard = thirdCard;
                                 fourthCount = thirdCount;
@@ -695,43 +717,43 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                             nextCount = highCount;
                         }
                         highCard = uHand.hand[index].rank;
-                        highCount = poker.CARD_INIT;
-                        mostCount = getMost(highCount, most, nextMost); 
+                        highCount = CARD_INIT;
                     }
                 }
                 else 
     // Cases: new card matches one already read
-            {                
-                if (uHand.hand[index].rank == nextCard){
-                    tempCount = nextCount;
-                    if(thirdCard != ZERO){
-                        fourthCard = thirdCard;
-                        fourthCount = thirdCount;
+            {      
+                if (uHand.hand[index].rank == lowCard){
+                    if(fourthCard != ZERO){
+                        if(thirdCard == fourthCard){
+                            nextCard = thirdCard;
+                        }
+                        thirdCard = fourthCard;
                     }
-                    nextCount++; 
-                    thirdCard = nextCard;
-                    thirdCount = tempCount;
-                    nextCard = uHand.hand[index].rank;
-                    mostCount = getMost(nextCount, most, nextMost); 
-                }
+                    lowCount++; 
+                    fourthCard = uHand.hand[index].rank;
+                    //mostCount = getMost(uHand.hand[index].rank, lowCount, 
+                    //        most, nextMost); 
+                }    
                 else
                     if (uHand.hand[index].rank == thirdCard){
                         thirdCount++; 
                         fourthCard = uHand.hand[index].rank;
-                        mostCount = getMost(thirdCount, most, nextMost); 
+                        //mostCount = getMost(uHand.hand[index].rank, thirdCount, 
+                        //        most, nextMost); 
                     }
-                else
-                    if (uHand.hand[index].rank == lowCard){
-                        if(fourthCard != ZERO){
-                            if(thirdCard == fourthCard){
-                                nextCard = thirdCard;
-                            }
-                            thirdCard = fourthCard;
+                else          
+                    if (uHand.hand[index].rank == nextCard){
+                        nextCount++; 
+                        if(thirdCard != ZERO){
+                            fourthCard = thirdCard;
+                            //fourthCount = thirdCount;
                         }
-                        lowCount++; 
-                        fourthCard = uHand.hand[index].rank;
-                        mostCount = getMost(lowCount, most, nextMost); 
-                    }    
+                        //tempCount = thirdCount;
+                        //thirdCard = nextCard;
+                        //thirdCount = tempCount;
+                        thirdCard = uHand.hand[index].rank;
+                    }
                 else
                 if (uHand.hand[index].rank < lowCard){
     // Case: second card read in has to be either high card or low card
@@ -749,7 +771,8 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                                 fourthCard = uHand.hand[index].rank;
                             }
                         highCount++;
-                        mostCount = getMost(highCount, most, nextMost);
+                        //mostCount = getMost(uHand.hand[index].rank, highCount, 
+                        //        most, nextMost);
                     }
                     else{
     // Case: new card read in is lower than the existing low card
@@ -768,14 +791,15 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                                 }
                                 else
                                 if ((fourthCard == ZERO)
-                                                && (thirdCount > ZERO)){
+                                                && (thirdCard > ZERO)){
                                     fourthCount = lowCount;
                                     fourthCard = lowCard;
                                 }
                             }
                             lowCard = uHand.hand[index].rank;
-                            lowCount = poker.CARD_INIT;
-                            mostCount = getMost(lowCount, most, nextMost);
+                            lowCount = CARD_INIT;
+                            //mostCount = getMost(uHand.hand[index].rank, 
+                             ////       lowCount, most, nextMost);
                         }
                     }
                     else
@@ -790,19 +814,23 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                         thirdCard = nextCard;
                         thirdCount = nextCount;
                         nextCard = uHand.hand[index].rank;
-                        nextCount = poker.CARD_INIT;	
-                        mostCount = getMost(nextCount, most, nextMost); 
+                        nextCount = CARD_INIT;	
+                        //mostCount = getMost(uHand.hand[index].rank, nextCount, 
+                        //        most, nextMost); 
                         }
                 else
                     if ((uHand.hand[index].rank > thirdCard)
                             && (index > 2)
                                     && (uHand.hand[index].rank < nextCard)){
     // Case: new card is lower than existing second but higher than third card
-                        fourthCard = thirdCard;
-                        fourthCount = thirdCount;
+                        if(fourthCard == ZERO){
+                            fourthCard = thirdCard;
+                            fourthCount = thirdCount;
+                        }
                         thirdCard = uHand.hand[index].rank;
-                        thirdCount = poker.CARD_INIT;
-                        mostCount = getMost(thirdCount, most, nextMost); 
+                        thirdCount = CARD_INIT;
+                        //mostCount = getMost(uHand.hand[index].rank, thirdCount, 
+                        //        most, nextMost); 
                     } 
                 else
     // Should only happen if there is no existing fourth card                    
@@ -811,15 +839,19 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                                 && (uHand.hand[index].rank > lowCard)
                                     && (index > 2)){
                         fourthCard = uHand.hand[index].rank;
-                        fourthCount = poker.CARD_INIT;
-                        mostCount = getMost(fourthCount, most, nextMost); 
+                        fourthCount = CARD_INIT;
+                        //mostCount = getMost(uHand.hand[index].rank, 
+                        //        fourthCount, most, nextMost); 
                     }
                 
                 }
                 }
-            most = mostCount[0];
-            nextMost = mostCount[1];
         }
+        int[] counts = new int[]{highCount, nextCount, thirdCount, fourthCount, 
+            lowCount};
+        mostCount = getMost(counts);
+        most = mostCount[0];
+        nextMost = mostCount[1];
         /*
         System.out.print("most: " + most + " next most: " + nextMost);
         System.out.println("High: " + highCard + " next: " + nextCard
@@ -848,6 +880,7 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                 }
             }
             // If highCount = most and nextCount = nextMost, it's already sorted
+            else
             if((highCount == most) && (thirdCount != nextMost)){
                     temp = thirdCard;
                     tempCount = thirdCount;
@@ -878,11 +911,12 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                     temp = highCard;
                     temp2 = nextCard;
                     highCard = lowCard;
-                    lowCount = highCount;
+                    //lowCount = highCount;
                     highCount = most;
                     nextCard = fourthCard;
                     nextCount = nextMost;
-                    fourthCard = temp2;
+                    fourthCard = temp;
+                    lowCard = temp2;
                 }
             }
             else
@@ -903,7 +937,7 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                     nextCount = nextMost;
                     fourthCard = temp;	
                 }
-                else 
+                else {
                     /* next card is most */
                     /* reorder next-high-low */
                     temp = highCard;
@@ -915,6 +949,7 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                     thirdCount = most;
                     fourthCard = temp;
                     fourthCount = nextMost;
+                }
             }
 	}
 	else
@@ -949,14 +984,15 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
                 if(lowCount == most){
                     temp = highCard;
                     temp2 = nextCard;
+                    int temp3 = thirdCard;
                     tempCount = highCount;
                     highCard = lowCard;
                     highCount = most;
                     nextCard = fourthCard;
                     nextCount = nextMost;
-                    thirdCount = tempCount;
                     lowCount = thirdCount;
-                    lowCard = thirdCard;
+                    thirdCount = tempCount;
+                    lowCard = temp3;
                     fourthCard = temp2;
                     thirdCard = temp;
                 }
@@ -967,8 +1003,8 @@ long isPair(int high_card, int next_card, int *third_card, int *low_card
         
         setMostCount(mostCount);
         
-        poker.Hand sHand = getSortedHand(sorted, uHand);
+        return getSortedHand(sorted, uHand);
 
-        return sHand;
+        //return sHand;
     }
 }
