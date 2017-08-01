@@ -690,10 +690,10 @@ public class Window extends javax.swing.JFrame {
  * @return  Image representation of the card
  */
     public static Image getCardImage(int cardID){
-        Image cardImage = new ImageIcon("src/cardDisplay/resources/cardRear.png")
+        Image cardImage = new ImageIcon("poker/resources/cardRear.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
         switch (cardID) {
-            case 1: cardImage = new ImageIcon("src/poker/resources/aceClubs.png")
+            case 1: cardImage = new ImageIcon("poker/resources/aceClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
             case 2: cardImage =   new ImageIcon("src/poker/resources/twoClubs.png")
