@@ -64,7 +64,7 @@ public class Window extends javax.swing.JFrame {
     static Deck shuffledDeck = new Deck();
     static Hand[] allHands = new Hand[poker.NUM_HANDS + poker.CARD_INIT];
     
-    static Image table = new ImageIcon("src/poker/resources/table.png")
+    static Image table = new ImageIcon("../build/classes/table.png")
         .getImage().getScaledInstance(60, 100, Image.SCALE_SMOOTH);
     
 // --- UI COMPONENTS -----------------------------------------------------------    
@@ -690,166 +690,166 @@ public class Window extends javax.swing.JFrame {
  * @return  Image representation of the card
  */
     public static Image getCardImage(int cardID){
-        Image cardImage = new ImageIcon("poker/resources/cardRear.png")
+        Image cardImage = new ImageIcon("..build/classes/cardRear.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
         switch (cardID) {
-            case 1: cardImage = new ImageIcon("poker/resources/aceClubs.png")
+            case 1: cardImage = new ImageIcon("../build/classes/aceClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 2: cardImage =   new ImageIcon("src/poker/resources/twoClubs.png")
+            case 2: cardImage =   new ImageIcon("../build/classes/twoClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 3: cardImage =  new ImageIcon("src/poker/resources/threeClubs.png")
+            case 3: cardImage =  new ImageIcon("../build/classes/threeClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 4: cardImage =  new ImageIcon("src/poker/resources/fourClubs.png")
+            case 4: cardImage =  new ImageIcon("../build/classes/fourClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 5: cardImage =  new ImageIcon("src/poker/resources/fiveClubs.png")
+            case 5: cardImage =  new ImageIcon("../build/classes/fiveClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 6: cardImage =  new ImageIcon("src/poker/resources/sixClubs.png")
+            case 6: cardImage =  new ImageIcon("../build/classes/sixClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 7: cardImage =  new ImageIcon("src/poker/resources/sevenClubs.png")
+            case 7: cardImage =  new ImageIcon("../build/classes/sevenClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 8: cardImage =   new ImageIcon("src/poker/resources/eightClubs.png")
+            case 8: cardImage =   new ImageIcon("../build/classes/eightClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 9: cardImage =  new ImageIcon("src/poker/resources/nineClubs.png")
+            case 9: cardImage =  new ImageIcon("../build/classes/nineClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break; 
-            case 10: cardImage =  new ImageIcon("src/poker/resources/tenClubs.png")
+            case 10: cardImage =  new ImageIcon("../build/classes/tenClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break; 
-            case 11: cardImage =  new ImageIcon("src/poker/resources/jackClubs.png")
+            case 11: cardImage =  new ImageIcon("../build/classes/jackClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break; 
-            case 12: cardImage =  new ImageIcon("src/poker/resources/queenClubs.png")
+            case 12: cardImage =  new ImageIcon("../build/classes/queenClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 13: cardImage =  new ImageIcon("src/poker/resources/kingClubs.png")
+            case 13: cardImage =  new ImageIcon("../build/classes/kingClubs.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break; 
-            case 14: cardImage =  new ImageIcon("src/poker/resources/aceDiamonds.png")
+            case 14: cardImage =  new ImageIcon("../build/classes/aceDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;  
-            case 15: cardImage =  new ImageIcon("src/poker/resources/twoDiamonds.png")
+            case 15: cardImage =  new ImageIcon("../build/classes/twoDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH);
                         break;
-            case 16: cardImage =  new ImageIcon("src/poker/resources/threeDiamonds.png")
+            case 16: cardImage =  new ImageIcon("../build/classes/threeDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 17: cardImage =  new ImageIcon("src/poker/resources/fourDiamonds.png")
+            case 17: cardImage =  new ImageIcon("../build/classes/fourDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 18: cardImage =  new ImageIcon("src/poker/resources/fiveDiamonds.png")
+            case 18: cardImage =  new ImageIcon("../build/classes/fiveDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 19: cardImage =  new ImageIcon("src/poker/resources/sixDiamonds.png")
+            case 19: cardImage =  new ImageIcon("../build/classes/sixDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 20: cardImage =  new ImageIcon("src/poker/resources/sevenDiamonds.png")
+            case 20: cardImage =  new ImageIcon("../build/classes/sevenDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 21: cardImage =  new ImageIcon("src/poker/resources/eightDiamonds.png")
+            case 21: cardImage =  new ImageIcon("../build/classes/eightDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 22: cardImage =  new ImageIcon("src/poker/resources/nineDiamonds.png")
+            case 22: cardImage =  new ImageIcon("../build/classes/nineDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 23: cardImage =  new ImageIcon("src/poker/resources/tenDiamonds.png")
+            case 23: cardImage =  new ImageIcon("../build/classes/tenDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 24: cardImage =  new ImageIcon("src/poker/resources/jackDiamonds.png")
+            case 24: cardImage =  new ImageIcon("../build/classes/jackDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 25: cardImage =  new ImageIcon("src/poker/resources/queenDiamonds.png")
+            case 25: cardImage =  new ImageIcon("../build/classes/queenDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 26: cardImage =   new ImageIcon("src/poker/resources/kingDiamonds.png")
+            case 26: cardImage =   new ImageIcon("../build/classes/kingDiamonds.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 27: cardImage =  new ImageIcon("src/poker/resources/aceHearts.png")
+            case 27: cardImage =  new ImageIcon("../build/classes/aceHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 28: cardImage =   new ImageIcon("src/poker/resources/twoHearts.png")
+            case 28: cardImage =   new ImageIcon("../build/classes/twoHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 29: cardImage =  new ImageIcon("src/poker/resources/threeHearts.png")
+            case 29: cardImage =  new ImageIcon("../build/classes/threeHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 30: cardImage =  new ImageIcon("src/poker/resources/fourHearts.png")
+            case 30: cardImage =  new ImageIcon("../build/classes/fourHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 31: cardImage =  new ImageIcon("src/poker/resources/fiveHearts.png")
+            case 31: cardImage =  new ImageIcon("../build/classes/fiveHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 32: cardImage =  new ImageIcon("src/poker/resources/sixHearts.png")
+            case 32: cardImage =  new ImageIcon("../build/classes/sixHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 33: cardImage =  new ImageIcon("src/poker/resources/sevenHearts.png")
+            case 33: cardImage =  new ImageIcon("../build/classes/sevenHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 34: cardImage =  new ImageIcon("src/poker/resources/eightHearts.png")
+            case 34: cardImage =  new ImageIcon("../build/classes/eightHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 35: cardImage =  new ImageIcon("src/poker/resources/nineHearts.png")
+            case 35: cardImage =  new ImageIcon("../build/classes/nineHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 36: cardImage =  new ImageIcon("src/poker/resources/tenHearts.png")
+            case 36: cardImage =  new ImageIcon("../build/classes/tenHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 37: cardImage =  new ImageIcon("src/poker/resources/jackHearts.png")
+            case 37: cardImage =  new ImageIcon("../build/classes/jackHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 38: cardImage =  new ImageIcon("src/poker/resources/queenHearts.png")
+            case 38: cardImage =  new ImageIcon("../build/classes/queenHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 39: cardImage =  new ImageIcon("src/poker/resources/kingHearts.png")
+            case 39: cardImage =  new ImageIcon("../build/classes/kingHearts.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 40: cardImage =  new ImageIcon("src/poker/resources/aceSpades.png")
+            case 40: cardImage =  new ImageIcon("../build/classes/aceSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 41: cardImage =  new ImageIcon("src/poker/resources/twoSpades.png")
+            case 41: cardImage =  new ImageIcon("../build/classes/twoSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;  
-            case 42: cardImage =  new ImageIcon("src/poker/resources/threeSpades.png")
+            case 42: cardImage =  new ImageIcon("../build/classes/threeSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 43: cardImage =  new ImageIcon("src/poker/resources/fourSpades.png")
+            case 43: cardImage =  new ImageIcon("../build/classes/fourSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 44: cardImage =  new ImageIcon("src/poker/resources/fiveSpades.png")
+            case 44: cardImage =  new ImageIcon("../build/classes/fiveSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 45: cardImage =  new ImageIcon("src/poker/resources/sixSpades.png")
+            case 45: cardImage =  new ImageIcon("../build/classes/sixSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 46: cardImage =  new ImageIcon("src/poker/resources/sevenSpades.png")
+            case 46: cardImage =  new ImageIcon("../build/classes/sevenSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 47: cardImage =  new ImageIcon("src/poker/resources/eightSpades.png")
+            case 47: cardImage =  new ImageIcon("../build/classes/eightSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 48: cardImage =  new ImageIcon("src/poker/resources/nineSpades.png")
+            case 48: cardImage =  new ImageIcon("../build/classes/nineSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break; 
-            case 49: cardImage =  new ImageIcon("src/poker/resources/tenSpades.png")
+            case 49: cardImage =  new ImageIcon("../build/classes/tenSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 50: cardImage =  new ImageIcon("src/poker/resources/jackSpades.png")
+            case 50: cardImage =  new ImageIcon("../build/classes/jackSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 51: cardImage =  new ImageIcon("src/poker/resources/queenSpades.png")
+            case 51: cardImage =  new ImageIcon("../build/classes/queenSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 52: cardImage =  new ImageIcon("src/poker/resources/kingSpades.png")
+            case 52: cardImage =  new ImageIcon("../build/classes/kingSpades.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
-            case 53: cardImage = new ImageIcon("src/poker/resources/cardRear.png")
+            case 53: cardImage = new ImageIcon("../build/classes/cardRear.png")
                         .getImage().getScaledInstance(75,125, Image.SCALE_SMOOTH); 
                         break;
         }
@@ -957,13 +957,13 @@ public class Window extends javax.swing.JFrame {
         
 /**                     showDemos
  * Dialog window that explains contents of the demonstration files. Loads
- * content from file src/poker/resources/demo.txt
+ * content from file ../build/classes/demo.txt
  *
  * @param 
  * @return
  */
     void showDemos(){
-        String demoPath = "src/poker/resources/demo.txt";
+        String demoPath = "../build/classes/demo.txt";
         JDialog dcFrame = new JDialog(mFrame, "Demos", 
             Dialog.ModalityType.APPLICATION_MODAL);
         JPanel dcPanel = new JPanel(new FlowLayout());
@@ -999,13 +999,13 @@ public class Window extends javax.swing.JFrame {
         
 /**                     showGameplay
  * Dialog window that displays gameplay instructions. Loads content from file at
- * src/poker/resources/gameplay.txt
+ * ../build/classes/gameplay.txt
  *
  * @param   null
  * @return  null
  */
     void showGameplay(){
-        String gameplayPath = "src/poker/resources/gameplay.txt";
+        String gameplayPath = "../build/classes/gameplay.txt";
         JDialog gcFrame = new JDialog(mFrame, "Gameplay", 
             Dialog.ModalityType.APPLICATION_MODAL);
         JPanel gcPanel = new JPanel(new FlowLayout());
@@ -1234,13 +1234,13 @@ public class Window extends javax.swing.JFrame {
         
 /**                         showKeyCommands
  * Opens a help window that displays available keyboard shortcuts. Loads content
- * from file at src/poker/resources/commands.txt
+ * from file at ../build/classes/commands.txt
  * 
  * @param   null
  * @return  null
  */
     void showKeyCommands(){
-        String commandPath = "src/poker/resources/commands.txt";
+        String commandPath = "../build/classes/commands.txt";
         JDialog kcFrame = new JDialog(mFrame, "Key Shortcuts", 
             Dialog.ModalityType.APPLICATION_MODAL);
         JPanel kcPanel = new JPanel(new FlowLayout());
@@ -1444,13 +1444,13 @@ public class Window extends javax.swing.JFrame {
         
 /**                             showRules
  * Opens a help window that displays the game rules. Loads content from file at
- * src/poker/resources/rules.txt
+ * ../build/classes/rules.txt
  *
  * @param   null
  * @return  null
  */    
     void showRules(){
-        String rulesPath = "src/poker/resources/rules.txt";
+        String rulesPath = "../build/classes/rules.txt";
         JDialog rcFrame = new JDialog(mFrame, "Rules", 
             Dialog.ModalityType.APPLICATION_MODAL);
         JPanel rcPanel = new JPanel(new FlowLayout());
